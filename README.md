@@ -37,7 +37,7 @@ It applies **global environment variables** (systemd root‑level) and allows **
 If Ollama runs as a system service (installed via `.deb` or `.rpm`):
 
 ```bash
-sudo python3 setup_ollama_local.py --global-env --threads 12
+sudo python3 setup_ollama_local.py --global-env --threads 8
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
@@ -50,11 +50,12 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
   ```
   OLLAMA_NUM_GPU=1
   OLLAMA_GPU_LAYERS=999
-  OLLAMA_NUM_THREADS=12
+  OLLAMA_NUM_THREADS=8
   OLLAMA_MAX_LOADED_MODELS=1
-  OLLAMA_KEEP_ALIVE=10m
+  OLLAMA_KEEP_ALIVE=5m
   CUDA_VISIBLE_DEVICES=0
   OLLAMA_FLASH_ATTENTION=1
+  OLLAMA_MAX_QUEUE=512
   ```
 
 <details>
@@ -62,7 +63,7 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
 
 
 ```bash
-python3 setup_ollama_local.py --global-env --threads 12
+python3 setup_ollama_local.py --global-env --threads 8
 systemctl --user daemon-reload && systemctl --user restart ollama
 ```
 
@@ -96,14 +97,18 @@ ollama run orch-agent  # CPU-only
 
 ## 🧩 Personas & Their Roles
 
-| Persona               | Base Model                            | Role                          | Why It’s Useful                                         |
-| --------------------- | ------------------------------------- | ----------------------------- | ------------------------------------------------------- |
-| 🧑‍💻 **dev-agent**      | `qwen2.5-coder:14b-instruct-q5_K_M`   | Code generation & refactoring | Expert in .NET, clean code, SOLID, and optimization     |
-| 🏗️ **arch-agent**      | `deepseek-r1:14b-qwen-distill-q5_K_M` | Architecture & design         | High reasoning depth, DDD, CQRS, scalability trade‑offs |
-| 🧪 **test-agent**      | `qwen2.5-coder:14b-instruct-q5_K_M`   | Testing & QA                  | Generates maintainable tests, detects edge cases        |
-| 🗂️ **plan-agent**      | `qwen2.5:14b-instruct-q4_K_M`         | Spec‑driven planning          | Produces detailed specs and milestones                  |
-| ⚡ **plan‑lite‑agent** | `qwen2.5:7b-instruct-q5_K_M`          | Quick sprint planning         | Lightweight, fast for agile breakdowns                  |
-| 🔀 **orch-agent**      | `llama3.1:8b-instruct-q4_0`           | Orchestration                 | CPU‑only router that coordinates all other agents       |
+| Persona               | Base Model                            | Role                          | Context | Why It's Useful                                         |
+| --------------------- | ------------------------------------- | ----------------------------- | ------- | ------------------------------------------------------- |
+| 🧑‍💻 **dev-agent**      | `qwen2.5-coder:32b-instruct-q4_K_M`   | Code generation & refactoring | 32K     | Larger model for complex .NET codebases, SOLID, optimization |
+| 🏗️ **arch-agent**      | `qwen2.5:32b-instruct-q4_K_M`         | Architecture & design         | 32K     | Deep reasoning for DDD, CQRS, microservices, K8s patterns |
+| 🧪 **test-agent**      | `qwen2.5-coder:14b-instruct-q5_K_M`   | Testing & QA                  | 16K     | Comprehensive test generation (unit, integration, e2e) |
+| 🗂️ **plan-agent**      | `qwen2.5:14b-instruct-q5_K_M`         | Spec‑driven planning          | 32K     | Detailed specs with DevOps and deployment considerations |
+| ⚡ **plan‑lite‑agent** | `qwen2.5:7b-instruct-q5_K_M`          | Quick sprint planning         | 8K      | Fast agile planning for sprints and tasks |
+| 🔀 **orch-agent**      | `qwen2.5:3b-instruct-q5_K_M`          | Orchestration                 | 4K      | Fast routing to appropriate personas |
+| �️ **review-agent**    | `qwen2.5-coder:14b-instruct-q5_K_M`   | Code review                   | 32K     | Security, performance, and maintainability analysis |
+| 🐛 **debug-agent**     | `qwen2.5-coder:32b-instruct-q4_K_M`   | Debugging specialist          | 32K     | Deep analysis of errors, stack traces, and root causes |
+| ♻️ **refactor-agent**  | `qwen2.5-coder:14b-instruct-q5_K_M`   | Code refactoring              | 32K     | Design patterns, complexity reduction, code smell fixes |
+| 📝 **docs-agent**      | `qwen2.5:7b-instruct-q5_K_M`          | Documentation                 | 16K     | API docs, architecture diagrams, user guides |
 
 ---
 
@@ -119,14 +124,79 @@ ollama run orch-agent  # CPU-only
 
 ---
 
+---
+
+## 🔄 Recommended Workflow
+
+Since you're using **one model at a time**, here's an optimized development workflow:
+
+### 📋 Project Planning Phase
+```bash
+ollama run orch-agent "I need to plan a new microservice for user authentication"
+# Routes to → plan-agent or plan-lite-agent
+```
+
+### 💻 Development Phase
+```bash
+ollama run dev-agent "Implement JWT authentication with refresh tokens in ASP.NET Core"
+```
+
+### 👁️ Code Review Phase
+```bash
+ollama run review-agent "Review this authentication controller for security issues: [paste code]"
+```
+
+### 🧪 Testing Phase
+```bash
+ollama run test-agent "Generate comprehensive tests for the AuthController including edge cases"
+```
+
+### 🐛 Debugging Phase
+```bash
+ollama run debug-agent "Analyze this stack trace: [paste error]"
+```
+
+### 🏗️ Architecture Decisions
+```bash
+ollama run arch-agent "Should I use CQRS for this microservice? Evaluate trade-offs"
+```
+
+### ♻️ Refactoring Phase
+```bash
+ollama run refactor-agent "Refactor this service to follow Repository pattern"
+```
+
+### 📝 Documentation Phase
+```bash
+ollama run docs-agent "Generate API documentation for the authentication endpoints"
+```
+
+---
+
+## ⚡ Performance Tips
+
+| Tip | Description | Impact |
+|-----|-------------|--------|
+| 🚀 **Pre-load models** | Run `ollama pull <model>` before first use | Faster first response |
+| 💾 **Keep models cached** | Frequently used models stay in memory (5min) | No reload latency |
+| 🧹 **Unload when switching** | Use `ollama stop <model>` to free VRAM | Faster context switch |
+| 📊 **Monitor VRAM** | Use `nvidia-smi -l 1` to watch GPU usage | Prevent OOM |
+| 🧠 **Use appropriate persona** | Smaller models (3B-7B) for simple tasks | Save VRAM & CPU |
+| 🔧 **Adjust threads** | Increase `--threads` if not using IDEs | Better CPU utilization |
+
+---
+
 ## 🖥️ Requirements
 
-| Requirement    | Recommended                           |
-| -------------- | ------------------------------------- |
-| Ollama version | ≥ 0.3.8                               |
-| GPU            | 16 GB VRAM (RTX 4060 Ti, 4070, A2000) |
-| RAM            | ≥ 32 GB                               |
-| OS             | Linux (systemd), macOS, or Windows 11 |
+| Requirement    | Recommended                              | Notes                                      |
+| -------------- | ---------------------------------------- | ------------------------------------------ |
+| Ollama version | ≥ 0.3.8                                  | Latest stable recommended                  |
+| GPU            | 16 GB VRAM (RTX 4060 Ti, 4070, A2000)    | Tested on RTX 4060 Ti 16GB                 |
+| CPU            | 8+ cores (Ryzen 7 5700X or equivalent)   | 8 threads reserved for Ollama              |
+| RAM            | ≥ 32 GB (64 GB recommended)              | For hybrid GPU+CPU offload with 32B models |
+| OS             | Linux (systemd), macOS, or Windows 11    | Flash Attention requires CUDA ≥ 8.0        |
+
+> **⚠️ Important**: If running IDEs + Docker + K8s simultaneously, ensure adequate CPU/RAM headroom.
 
 ---
 
