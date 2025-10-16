@@ -17,15 +17,18 @@
 
 ## 🚀 Overview
 
-This script (`setup_ollama_local.py`) automatically configures **Ollama** for a complete, local‑first software development experience.  
-It applies **global environment variables** (systemd root‑level) and allows **on‑demand creation** of domain‑specific AI personas.
+This project provides `setup_ollama.py` — a complete setup and validation tool for **Ollama** development environments.  
+It applies **global environment variables** (systemd root‑level), creates domain‑specific AI personas, and validates your installation.
 
 ### ✅ Highlights
 
 - 🧩 Persona‑based AI agents (Dev, Arch, Test, Plan, Orchestrator)
 - ⚙️ Global configuration (root/systemd override or user fallback)
+- ✅ Built‑in validation and health checks
+- 🧪 Agent testing with performance metrics
 - 💻 Optimized for GPUs (e.g., RTX 4060‑Ti, 4070, A2000)
 - 🔐 100% Local — no cloud dependency
+- 🌐 Cross‑platform (Linux, macOS, Windows)
 - 🧱 Extensible — easily add your own personas
 
 ---
@@ -37,7 +40,7 @@ It applies **global environment variables** (systemd root‑level) and allows **
 If Ollama runs as a system service (installed via `.deb` or `.rpm`):
 
 ```bash
-sudo python3 setup_ollama_local.py --global-env --threads 8
+sudo python3 setup_ollama.py --global-env --threads 14
 sudo systemctl daemon-reload && sudo systemctl restart ollama
 ```
 
@@ -76,22 +79,49 @@ systemctl --user daemon-reload && systemctl --user restart ollama
 List available personas:
 
 ```bash
-python3 setup_ollama_local.py --list
+python3 setup_ollama.py --list
 ```
 
 Pull and create specific personas (example):
 
 ```bash
-python3 setup_ollama_local.py --pull --create --persona dev,plan
+python3 setup_ollama.py --pull --create --persona dev,arch
 ```
 
 Once created, you can run them instantly:
 
 ```bash
 ollama run dev-agent
-ollama run plan-agent
-ollama run orch-agent  # CPU-only
+ollama run arch-agent
 ```
+
+---
+
+### ✅ 3. Validate Setup
+
+Check if everything is properly installed:
+
+```bash
+# Full validation (includes agent tests)
+python3 setup_ollama.py --validate
+
+# Quick validation (skip agent tests)
+python3 setup_ollama.py --validate --quick
+
+# Test specific agent
+python3 setup_ollama.py --test-agent arch-agent
+
+# Check VRAM usage
+python3 setup_ollama.py --check-vram
+```
+
+**Validation includes:**
+- ✅ Ollama installation check
+- ✅ Base models verification
+- ✅ Agent creation status
+- ✅ VRAM usage monitoring
+- ✅ Agent response tests (optional)
+- ✅ Performance metrics
 
 ---
 
@@ -100,7 +130,11 @@ ollama run orch-agent  # CPU-only
 | Persona               | Base Model                            | Role                          | Context | Why It's Useful                                         |
 | --------------------- | ------------------------------------- | ----------------------------- | ------- | ------------------------------------------------------- |
 | 🧑‍💻 **dev-agent**      | `qwen2.5-coder:32b-instruct-q4_K_M`   | Code generation & refactoring | 32K     | Larger model for complex .NET codebases, SOLID, optimization |
-| 🏗️ **arch-agent**      | `qwen2.5:32b-instruct-q4_K_M`         | Architecture & design         | 32K     | Deep reasoning for DDD, CQRS, microservices, K8s patterns |
+| 💻 **dev-qwen3coder** ⭐ | `qwen3-coder:30b-q5_K_M`              | Code gen (2025 model)         | 32K     | Latest Qwen3-Coder - +8% quality, better debugging (-15% bugs) |
+| 🏗️ **arch-agent**      | `qwen2.5:32b-instruct-q5_K_M`         | Architecture & design         | 32K     | Deep reasoning for DDD, CQRS, microservices, K8s patterns |
+| 🚀 **arch-qwen3** ⭐    | `qwen3:32b-instruct-q5_K_M`           | Architecture (2025 model)     | 32K     | Latest Qwen3 - improved reasoning, code & math (+5% better) |
+| ⚡ **arch-qwen3moe**    | `qwen3:30b-q5_K_M` (MoE)              | Architecture (fast)           | 32K     | 50% faster, 12GB VRAM - ideal for interactive sessions |
+| 🧠 **arch-deepseek**   | `deepseek-r1:32b-q4_K_M`              | Architecture (reasoning)      | 32K     | Chain-of-thought native - best for complex problems |
 | 🧪 **test-agent**      | `qwen2.5-coder:14b-instruct-q5_K_M`   | Testing & QA                  | 16K     | Comprehensive test generation (unit, integration, e2e) |
 | 🗂️ **plan-agent**      | `qwen2.5:14b-instruct-q5_K_M`         | Spec‑driven planning          | 32K     | Detailed specs with DevOps and deployment considerations |
 | ⚡ **plan‑lite‑agent** | `qwen2.5:7b-instruct-q5_K_M`          | Quick sprint planning         | 8K      | Fast agile planning for sprints and tasks |
@@ -112,12 +146,85 @@ ollama run orch-agent  # CPU-only
 
 ---
 
-## 💡 Why Local‑First?
+## 🆕 New Models 2025
+
+Four new agent variants are available using the latest 2025 models:
+
+### Development Agent (Qwen3-Coder)
+
+```bash
+# Latest coding model: Qwen3-Coder (recommended for dev work)
+python3 setup_ollama_local.py --persona dev-qwen3coder --pull --create
+ollama run dev-agent-qwen3coder
+```
+
+**Improvements over Qwen2.5-Coder:**
+- +8% code quality across all languages
+- +12% better bug detection
+- -15% fewer code hallucinations
+- Up-to-date with 2025 frameworks
+
+**See detailed guide:** [`docs/DEV_AGENT_QWEN3CODER_GUIDE.md`](docs/DEV_AGENT_QWEN3CODER_GUIDE.md)
+
+### Architecture Agents
+
+```bash
+# Recommended: Qwen3 (balanced, best overall)
+python3 setup_ollama_local.py --persona arch-qwen3 --pull --create
+ollama run arch-agent-qwen3
+
+# Fast: Qwen3 MoE (50% faster, uses 12GB VRAM)
+python3 setup_ollama_local.py --persona arch-qwen3moe --pull --create
+ollama run arch-agent-qwen3moe
+
+# Best reasoning: DeepSeek-R1 (chain-of-thought native)
+python3 setup_ollama_local.py --persona arch-deepseek --pull --create
+ollama run arch-agent-deepseek
+```
+
+**See detailed comparison:** [`docs/LATEST_MODELS_2025.md`](docs/LATEST_MODELS_2025.md)  
+**See usage guide:** [`docs/ARCH_AGENT_VARIANTS_GUIDE.md`](docs/ARCH_AGENT_VARIANTS_GUIDE.md)
+
+---
+
+## 📦 Modelfile Structure
+
+Each persona is defined by a **Modelfile** in the `modelfiles/` directory. This approach offers several advantages:
+
+- **Maintainability**: System prompts are stored in separate, version-controlled files
+- **Readability**: Multi-line prompts with proper formatting
+- **Reusability**: Can be shared, modified, or reused across projects
+- **No syntax issues**: Avoids inline string formatting problems
+
+### Example Modelfile Structure
+
+```dockerfile
+FROM qwen2.5-coder:32b-instruct-q4_K_M
+
+SYSTEM """You are an expert software engineer...
+[Multi-line system prompt with proper formatting]
+"""
+
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER num_ctx 32768
+```
+
+### Customizing Personas
+
+To modify a persona's behavior:
+1. Edit the corresponding Modelfile in `modelfiles/[persona]-agent.Modelfile`
+2. Recreate the persona: `python3 setup_ollama_local.py --create --persona dev`
+3. Test: `ollama run dev-agent "your test prompt"`
+
+---
+
+## �💡 Why Local‑First?
 
 | Benefit              | Description                                                  |
 | -------------------- | ------------------------------------------------------------ |
 | 🔐 **Privacy**        | Keep all code and context local — ideal for internal projects |
-| ⚡ **Performance**    | Quantized models (`q4`, `q5`) fit well in 16 GB VRAM GPUs    |
+| ⚡ **Performance**    | Quantized models (`q4`, `q5`) fit well in 16 GB VRAM GPUs    |
 | 🧩 **Specialization** | Each persona is tuned for a distinct dev role                |
 | 🧱 **Simplicity**     | One Python script — no Docker, no cloud                      |
 | 🧠 **Extensible**     | Add your own personas or change base models easily           |
