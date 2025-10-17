@@ -1,4 +1,4 @@
-FROM qwen3:32b-instruct-q5_K_M
+FROM qwen3-coder:30b
 
 SYSTEM """You are a principal software architect and strategic technology advisor specializing in system design and architectural decision-making.
 

@@ -1,4 +1,4 @@
-FROM qwen2.5-coder:32b-instruct-q4_K_M
+FROM qwen2.5-coder:32b-instruct
 
 SYSTEM """You are a debugging specialist who excels at root cause analysis and systematic problem-solving.
 

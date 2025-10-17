@@ -5,13 +5,11 @@
   <sub>Configure, orchestrate, and run specialized Ollama personas for software development — fully local, GPU‑optimized, and private.</sub>
 </p>
 
-
 <p align="center">
   <img src="https://img.shields.io/badge/license-MIT-green.svg">
   <img src="https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-blue">
   <img src="https://img.shields.io/badge/Ollama-compatible-orange">
 </p>
-
 
 ---
 
@@ -22,14 +20,29 @@ It applies **global environment variables** (systemd root‑level), creates doma
 
 ### ✅ Highlights
 
-- 🧩 Persona‑based AI agents (Dev, Arch, Test, Plan, Orchestrator)
-- ⚙️ Global configuration (root/systemd override or user fallback)
-- ✅ Built‑in validation and health checks
-- 🧪 Agent testing with performance metrics
-- 💻 Optimized for GPUs (e.g., RTX 4060‑Ti, 4070, A2000)
-- 🔐 100% Local — no cloud dependency
-- 🌐 Cross‑platform (Linux, macOS, Windows)
-- 🧱 Extensible — easily add your own personas
+- 🧩 **15 Specialized AI Personas** (Architecture, Dev, Test, Review, Debug, Planning, Orchestration)
+- ⚙️ **Automated Setup** from Modelfiles (100% reproducible)
+- ✅ **Built‑in Validation** and health checks
+- 🧪 **Agent Testing** with performance metrics
+- 💻 **GPU Optimized** (RTX 5060‑Ti, 4070, A2000, etc.)
+- 🔐 **100% Local** — no cloud dependency
+- 🌐 **Cross‑platform** (Linux, macOS, Windows)
+- 🧱 **Extensible** — easily add your own personas
+
+### 📦 What's New (October 2025)
+
+✅ **Refactored Setup Script:**
+- Agent names automatically extracted from Modelfiles
+- Strict validation of Modelfile tags
+- Cleaner PERSONAS dictionary (metadata only)
+
+✅ **All Modelfiles Updated:**
+- Generic tags for reliability (`qwen2.5:32b-instruct` instead of `-q5_K_M`)
+- Fixed typos and invalid model references
+- 7 unique base models (down from 11+)
+
+📚 **Documentation:**
+- [`MODELFILE_TAGS.md`](docs/MODELFILE_TAGS.md) - Complete tag reference
 
 ---
 
@@ -66,7 +79,7 @@ sudo systemctl daemon-reload && sudo systemctl restart ollama
 
 
 ```bash
-python3 setup_ollama_local.py --global-env --threads 8
+python3 setup_ollama.py --global-env --threads 8
 systemctl --user daemon-reload && systemctl --user restart ollama
 ```
 
@@ -125,65 +138,71 @@ python3 setup_ollama.py --check-vram
 
 ---
 
-## 🧩 Personas & Their Roles
+## 🧩 Available Personas
 
-| Persona               | Base Model                            | Role                          | Context | Why It's Useful                                         |
-| --------------------- | ------------------------------------- | ----------------------------- | ------- | ------------------------------------------------------- |
-| 🧑‍💻 **dev-agent**      | `qwen2.5-coder:32b-instruct-q4_K_M`   | Code generation & refactoring | 32K     | Larger model for complex .NET codebases, SOLID, optimization |
-| 💻 **dev-qwen3coder** ⭐ | `qwen3-coder:30b-q5_K_M`              | Code gen (2025 model)         | 32K     | Latest Qwen3-Coder - +8% quality, better debugging (-15% bugs) |
-| 🏗️ **arch-agent**      | `qwen2.5:32b-instruct-q5_K_M`         | Architecture & design         | 32K     | Deep reasoning for DDD, CQRS, microservices, K8s patterns |
-| 🚀 **arch-qwen3** ⭐    | `qwen3:32b-instruct-q5_K_M`           | Architecture (2025 model)     | 32K     | Latest Qwen3 - improved reasoning, code & math (+5% better) |
-| ⚡ **arch-qwen3moe**    | `qwen3:30b-q5_K_M` (MoE)              | Architecture (fast)           | 32K     | 50% faster, 12GB VRAM - ideal for interactive sessions |
-| 🧠 **arch-deepseek**   | `deepseek-r1:32b-q4_K_M`              | Architecture (reasoning)      | 32K     | Chain-of-thought native - best for complex problems |
-| 🧪 **test-agent**      | `qwen2.5-coder:14b-instruct-q5_K_M`   | Testing & QA                  | 16K     | Comprehensive test generation (unit, integration, e2e) |
-| 🗂️ **plan-agent**      | `qwen2.5:14b-instruct-q5_K_M`         | Spec‑driven planning          | 32K     | Detailed specs with DevOps and deployment considerations |
-| ⚡ **plan‑lite‑agent** | `qwen2.5:7b-instruct-q5_K_M`          | Quick sprint planning         | 8K      | Fast agile planning for sprints and tasks |
-| 🔀 **orch-agent**      | `qwen2.5:3b-instruct-q5_K_M`          | Orchestration                 | 4K      | Fast routing to appropriate personas |
-| �️ **review-agent**    | `qwen2.5-coder:14b-instruct-q5_K_M`   | Code review                   | 32K     | Security, performance, and maintainability analysis |
-| 🐛 **debug-agent**     | `qwen2.5-coder:32b-instruct-q4_K_M`   | Debugging specialist          | 32K     | Deep analysis of errors, stack traces, and root causes |
-| ♻️ **refactor-agent**  | `qwen2.5-coder:14b-instruct-q5_K_M`   | Code refactoring              | 32K     | Design patterns, complexity reduction, code smell fixes |
-| 📝 **docs-agent**      | `qwen2.5:7b-instruct-q5_K_M`          | Documentation                 | 16K     | API docs, architecture diagrams, user guides |
+This setup includes **15 specialized AI agents** organized by function:
+
+### 🏗️ Architecture Agents (5 variants)
+
+| Persona ID | Agent Name | Base Model | Role |
+|------------|------------|------------|------|
+| **arch** | `arch-agent` | `qwen2.5:32b-instruct` | Principal architect - DDD, microservices, cloud-native |
+| **arch-deepseek** | `arch-agent-deepseek` | `deepseek-r1:32b` | Architecture with chain-of-thought reasoning |
+| **arch-qwen3_14b** | `arch-agent-qwen3_14b` | `qqwen3:14b` | Mid-size architecture decisions |
+| **arch-qwen3_30b** | `arch-agent-qwen3_30b` | `qwen3:30b` | Large-scale architecture reasoning |
+| **arch-qwen3_coder** | `arch-agent-qwen3_coder` | `qwen3-coder:30b` | Code-focused architecture |
+
+### 💻 Development Agents (2 variants)
+
+| Persona ID | Agent Name | Base Model | Role |
+|------------|------------|------------|------|
+| **dev** | `dev-agent` | `qwen2.5-coder:32b` | Full-stack development, SOLID principles |
+| **dev-qw3** | `dev-agent-qw3` | `qwen3-coder:30b` | Development with latest Qwen3 coder |
+
+### 🧪 Quality Assurance Agents (4 agents)
+
+| Persona ID | Agent Name | Base Model | Role |
+|------------|------------|------------|------|
+| **test** | `test-agent` | `qwen2.5-coder:14b-instruct` | Test generation (unit, integration, e2e) |
+| **review** | `review-agent` | `qwen2.5-coder:14b-instruct` | Code review, security, performance |
+| **debug** | `debug-agent` | `qwen2.5-coder:32b-instruct` | Debugging and error analysis |
+| **refactor** | `refactor-agent` | `qwen2.5-coder:14b-instruct` | Code refactoring, design patterns |
+
+### 📋 Planning & Documentation Agents (4 agents)
+
+| Persona ID | Agent Name | Base Model | Role |
+|------------|------------|------------|------|
+| **plan** | `plan-agent` | `qwen2.5:14b-instruct` | Detailed project planning with DevOps |
+| **planlite** | `planlite-agent` | `qwen2.5:7b-instruct` | Quick sprint and task planning |
+| **orch** | `orch-agent` | `qwen2.5:3b-instruct` | Fast orchestration and routing |
+| **docs** | `docs-agent` | `qwen2.5:7b-instruct` | API docs, diagrams, user guides |
+
+### Usage Examples
+
+```bash
+# Create specific agents
+python3 setup_ollama.py --pull --create --persona arch,dev,test
+
+# Run agents
+ollama run arch-agent "Design a microservices architecture for e-commerce"
+ollama run dev-agent "Implement authentication with JWT in ASP.NET Core"
+ollama run test-agent "Generate tests for the authentication controller"
+
+# Use variants
+ollama run arch-agent-deepseek "Complex system design with reasoning chain"
+ollama run dev-agent-qw3 "Latest coding model for modern frameworks"
+```
 
 ---
 
-## 🆕 New Models 2025
+## 📚 Additional Documentation
 
-Four new agent variants are available using the latest 2025 models:
+For more details on architecture agent variants and their use cases:
 
-### Development Agent (Qwen3-Coder)
-
-```bash
-# Latest coding model: Qwen3-Coder (recommended for dev work)
-python3 setup_ollama_local.py --persona dev-qwen3coder --pull --create
-ollama run dev-agent-qwen3coder
-```
-
-**Improvements over Qwen2.5-Coder:**
-- +8% code quality across all languages
-- +12% better bug detection
-- -15% fewer code hallucinations
-- Up-to-date with 2025 frameworks
-
-**See detailed guide:** [`docs/DEV_AGENT_QWEN3CODER_GUIDE.md`](docs/DEV_AGENT_QWEN3CODER_GUIDE.md)
-
-### Architecture Agents
-
-```bash
-# Recommended: Qwen3 (balanced, best overall)
-python3 setup_ollama_local.py --persona arch-qwen3 --pull --create
-ollama run arch-agent-qwen3
-
-# Fast: Qwen3 MoE (50% faster, uses 12GB VRAM)
-python3 setup_ollama_local.py --persona arch-qwen3moe --pull --create
-ollama run arch-agent-qwen3moe
-
-# Best reasoning: DeepSeek-R1 (chain-of-thought native)
-python3 setup_ollama_local.py --persona arch-deepseek --pull --create
-ollama run arch-agent-deepseek
-```
-
-**See detailed comparison:** [`docs/LATEST_MODELS_2025.md`](docs/LATEST_MODELS_2025.md)  
-**See usage guide:** [`docs/ARCH_AGENT_VARIANTS_GUIDE.md`](docs/ARCH_AGENT_VARIANTS_GUIDE.md)
+- **Architecture Agents Guide**: [`docs/ARCH_AGENT_VARIANTS_GUIDE.md`](docs/ARCH_AGENT_VARIANTS_GUIDE.md)
+- **Model Selection Guide**: [`docs/MODEL_CHOICES.md`](docs/MODEL_CHOICES.md)
+- **Parameter Optimization**: [`docs/PARAMETER_OPTIMIZATION_SUMMARY.md`](docs/PARAMETER_OPTIMIZATION_SUMMARY.md)
+- **System Prompts Reference**: [`docs/SYSTEM_PROMPTS.md`](docs/SYSTEM_PROMPTS.md)
 
 ---
 
@@ -214,22 +233,20 @@ PARAMETER num_ctx 32768
 
 To modify a persona's behavior:
 1. Edit the corresponding Modelfile in `modelfiles/[persona]-agent.Modelfile`
-2. Recreate the persona: `python3 setup_ollama_local.py --create --persona dev`
+2. Recreate the persona: `python3 setup_ollama.py --create --persona dev`
 3. Test: `ollama run dev-agent "your test prompt"`
 
 ---
 
-## �💡 Why Local‑First?
+## 💡 Why Local-First?
 
 | Benefit              | Description                                                  |
 | -------------------- | ------------------------------------------------------------ |
 | 🔐 **Privacy**        | Keep all code and context local — ideal for internal projects |
-| ⚡ **Performance**    | Quantized models (`q4`, `q5`) fit well in 16 GB VRAM GPUs    |
-| 🧩 **Specialization** | Each persona is tuned for a distinct dev role                |
-| 🧱 **Simplicity**     | One Python script — no Docker, no cloud                      |
+| ⚡ **Performance**    | Optimized for 16 GB VRAM GPUs with efficient model selection |
+| 🧩 **Specialization** | Each persona is tuned for a distinct development role        |
+| 🧱 **Simplicity**     | One Python script — no Docker, no cloud dependencies         |
 | 🧠 **Extensible**     | Add your own personas or change base models easily           |
-
----
 
 ---
 
@@ -350,8 +367,10 @@ Licensed under the **MIT License** — free for personal and commercial use.
 
 Built for developers who love:
 
-- 🧠 **Ollama**
-- ⚙️ **Qwen 2.5**, **DeepSeek R1**, **Llama 3.1**
+- 🧠 **Ollama** - Local LLM runtime
+- ⚙️ **Qwen 2.5** & **Qwen3** - High-quality coding models
+- 🤖 **DeepSeek R1** - Advanced reasoning capabilities
+- 💻 Clean, private, local AI for everyday coding & architecture
 - 💻 Clean, private, local AI for everyday coding & architecture
 
-<p align="center"><b>Happy Building 🚀</b></p>
+<p align

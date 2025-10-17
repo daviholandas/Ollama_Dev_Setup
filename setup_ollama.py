@@ -44,86 +44,73 @@ class Colors:
     BOLD = '\033[1m'
     RESET = '\033[0m'
 
+# Persona metadata - used only for listing and validation
+# Agent creation is strictly done from Modelfiles in modelfiles/ directory
 PERSONAS = {
-    "dev": {
-        "agent": "dev-agent",
-        "base_model": "qwen2.5-coder:32b-instruct-q5_K_M",
-        "description": "Code generation specialist (.NET, boilerplate)"
-    },
-    "dev-qwen3coder": {
-        "agent": "dev-agent-qwen3coder",
-        "base_model": "qwen3-coder:30b-q5_K_M",
-        "modelfile": "dev-agent-qwen3coder.Modelfile",
-        "description": "Code generation (2025 model) - +8% quality, better debugging"
-    },
+    # Architecture agents
     "arch": {
-        "agent": "arch-agent",
-        "base_model": "qwen2.5:32b-instruct-q5_K_M",
-        "description": "Architecture reasoning (solo usage, MCP/RAG)"
-    },
-    "arch-qwen3": {
-        "agent": "arch-agent-qwen3",
-        "base_model": "qwen3:32b-instruct-q5_K_M",
-        "modelfile": "arch-agent-qwen3.Modelfile",
-        "description": "Architecture (2025 model) - improved reasoning & code (+5%)"
-    },
-    "arch-qwen3moe": {
-        "agent": "arch-agent-qwen3moe",
-        "base_model": "qwen3:30b-q5_K_M",
-        "modelfile": "arch-agent-qwen3moe.Modelfile",
-        "description": "Architecture (fast MoE) - 50% faster, 12GB VRAM"
-    },
-    "arch-qwen2.5:72B": {
-        "agent": "arch-agent-qwen2.5:72B",
-        "base_model": "qwen2.5:72B-iinstruct-q2_K",
-        "modelfile": "arch-agent-qwen72b.Modelfile",
-        "description": "Architecture (fast MoE) - 50% faster, 12GB VRAM"
+        "modelfile": "arch-agent.Modelfile",
+        "description": "Principal architect - DDD, microservices, cloud-native (qwen2.5:32b-instruct)"
     },
     "arch-deepseek": {
-        "agent": "arch-agent-deepseek",
-        "base_model": "deepseek-r1:32b-q4_K_M",
         "modelfile": "arch-agent-deepseek.Modelfile",
-        "description": "Architecture (reasoning) - chain-of-thought native"
+        "description": "Architecture with chain-of-thought reasoning (deepseek-r1:32b)"
     },
+    "arch-qwen3_14b": {
+        "modelfile": "arch-agent-qwen3_14b.Modelfile",
+        "description": "Architecture variant with Qwen3 14B (qqwen3:14b)"
+    },
+    "arch-qwen3_30b": {
+        "modelfile": "arch-agent-qwen3_30b.Modelfile",
+        "description": "Architecture variant with Qwen3 30B (qwen3:30b)"
+    },
+    "arch-qwen3_coder": {
+        "modelfile": "arch-agent-qwen3_coder.Modelfile",
+        "description": "Architecture with code focus (qwen3-coder:30b)"
+    },
+    
+    # Development agents
+    "dev": {
+        "modelfile": "dev-agent.Modelfile",
+        "description": "Code generation specialist - .NET, boilerplate (qwen2.5-coder:32b)"
+    },
+    "dev-qw3": {
+        "modelfile": "dev-agent-qw3.Modelfile",
+        "description": "Code generation with Qwen3 Coder 30B (qwen3-coder:30b)"
+    },
+    
+    # Specialized agents
     "test": {
-        "agent": "test-agent",
-        "base_model": "qwen2.5-coder:14b-instruct-q5_K_M",
-        "description": "Test generation (unit, integration, e2e)"
+        "modelfile": "test-agent.Modelfile",
+        "description": "Test generation - unit, integration, e2e (qwen2.5-coder:14b-instruct)"
     },
     "plan": {
-        "agent": "plan-agent",
-        "base_model": "qwen2.5:14b-instruct-q5_K_M",
-        "description": "Detailed project planning and specs"
+        "modelfile": "plan-agent.Modelfile",
+        "description": "Detailed project planning and specifications (qwen2.5:14b-instruct)"
     },
     "planlite": {
-        "agent": "plan-lite-agent",
-        "base_model": "qwen2.5:7b-instruct-q5_K_M",
-        "description": "Quick sprint planning"
+        "modelfile": "planlite-agent.Modelfile",
+        "description": "Quick sprint planning and agile specs (qwen2.5:7b-instruct)"
     },
     "orch": {
-        "agent": "orch-agent",
-        "base_model": "qwen2.5:3b-instruct-q5_K_M",
-        "description": "Intelligent routing agent"
+        "modelfile": "orch-agent.Modelfile",
+        "description": "Intelligent routing and task orchestration (qwen2.5:3b-instruct)"
     },
     "review": {
-        "agent": "review-agent",
-        "base_model": "qwen2.5-coder:14b-instruct-q5_K_M",
-        "description": "Code review (security, performance)"
+        "modelfile": "review-agent.Modelfile",
+        "description": "Code review - security, performance, best practices (qwen2.5-coder:14b-instruct)"
     },
     "debug": {
-        "agent": "debug-agent",
-        "base_model": "qwen2.5-coder:32b-instruct-q4_K_M",
-        "description": "Root cause analysis and debugging"
+        "modelfile": "debug-agent.Modelfile",
+        "description": "Root cause analysis and debugging (qwen2.5-coder:32b-instruct)"
     },
     "refactor": {
-        "agent": "refactor-agent",
-        "base_model": "qwen2.5-coder:14b-instruct-q5_K_M",
-        "description": "Code quality improvement"
+        "modelfile": "refactor-agent.Modelfile",
+        "description": "Code quality improvement and refactoring (qwen2.5-coder:14b-instruct)"
     },
     "docs": {
-        "agent": "docs-agent",
-        "base_model": "qwen2.5:7b-instruct-q5_K_M",
-        "description": "Technical documentation"
+        "modelfile": "docs-agent.Modelfile",
+        "description": "Technical documentation and API docs (qwen2.5:7b-instruct)"
     }
 }
 
@@ -311,49 +298,94 @@ def setup_environment(threads: int):
     if os_name != "windows":
         print_warning("Remember to reload shell: source ~/.bashrc")
 
+def get_agent_name_from_modelfile(modelfile_path: Path) -> Optional[str]:
+    """Extract agent name from Modelfile filename (removes .Modelfile extension)"""
+    return modelfile_path.stem if modelfile_path.suffix == ".Modelfile" else None
+
+def get_base_model_from_modelfile(modelfile_path: Path) -> Optional[str]:
+    """Extract base model FROM directive from Modelfile"""
+    try:
+        with open(modelfile_path, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith("FROM "):
+                    return line.split("FROM ", 1)[1].strip()
+    except Exception as e:
+        print_error(f"Failed to read Modelfile: {e}")
+    return None
+
 def create_persona(persona: str, do_pull: bool, do_create: bool):
-    """Download model and create agent"""
+    """Download model and create agent strictly from Modelfile"""
+    if persona not in PERSONAS:
+        print_error(f"Unknown persona: {persona}")
+        return False
+    
     cfg = PERSONAS[persona]
+    script_dir = Path(__file__).parent.resolve()
+    modelfile_path = script_dir / "modelfiles" / cfg["modelfile"]
+    
+    if not modelfile_path.exists():
+        print_error(f"Modelfile not found: {modelfile_path}")
+        return False
+    
+    # Extract agent name from Modelfile filename
+    agent_name = get_agent_name_from_modelfile(modelfile_path)
+    if not agent_name:
+        print_error(f"Could not determine agent name from: {modelfile_path.name}")
+        return False
+    
+    # Extract base model from Modelfile
+    base_model = get_base_model_from_modelfile(modelfile_path)
+    if not base_model:
+        print_error(f"No FROM directive found in {modelfile_path.name}")
+        return False
+    
+    print_info(f"Persona: {persona}")
+    print_info(f"Agent name: {agent_name}")
+    print_info(f"Modelfile: {cfg['modelfile']}")
+    print_info(f"Base model: {base_model}")
     
     if do_pull:
-        print_info(f"Pulling base model: {cfg['base_model']}")
-        success, _ = run_command(["ollama", "pull", cfg["base_model"]])
+        print_info(f"Pulling base model: {base_model}")
+        success, error_msg = run_command(["ollama", "pull", base_model])
         if not success:
-            print_error(f"Failed to pull {cfg['base_model']}")
+            print_error(f"Failed to pull {base_model}")
+            print_error(f"Error: {error_msg}")
             return False
+        print_success(f"Model {base_model} pulled successfully!")
     
     if do_create:
-        script_dir = Path(__file__).parent
+        print_info(f"Creating agent: {agent_name}")
         
-        # Check if custom modelfile path is specified (for 2025 models)
-        if "modelfile" in cfg:
-            modelfile_name = cfg["modelfile"]
-        else:
-            modelfile_name = f"{cfg['agent']}.Modelfile"
-        
-        modelfile_path = script_dir / "modelfiles" / modelfile_name
-        
-        if not modelfile_path.exists():
-            print_error(f"Modelfile not found: {modelfile_path}")
-            return False
-        
-        print_info(f"Creating agent: {cfg['agent']}")
-        success, _ = run_command(
-            ["ollama", "create", cfg["agent"], "-f", str(modelfile_path)]
+        success, error_msg = run_command(
+            ["ollama", "create", agent_name, "-f", str(modelfile_path)]
         )
+        
         if not success:
-            print_error(f"Failed to create {cfg['agent']}")
+            print_error(f"Failed to create {agent_name}")
+            print_error(f"Ollama error: {error_msg}")
             return False
+        
+        print_success(f"Agent {agent_name} created successfully!")
     
     return True
 
 def validate_models() -> Tuple[int, int]:
-    """Validate installed models"""
-    print_info("Checking installed models...")
+    """Validate installed base models by reading FROM directives in Modelfiles"""
+    print_info("Checking installed base models...")
     print()
     
+    script_dir = Path(__file__).parent.resolve()
+    modelfiles_dir = script_dir / "modelfiles"
     ollama_list = get_ollama_list()
-    required_models = set(cfg["base_model"] for cfg in PERSONAS.values())
+    required_models = set()
+    
+    # Scan all Modelfiles to extract required base models
+    if modelfiles_dir.exists():
+        for modelfile_path in modelfiles_dir.glob("*.Modelfile"):
+            base_model = get_base_model_from_modelfile(modelfile_path)
+            if base_model:
+                required_models.add(base_model)
     
     found = 0
     total = len(required_models)
@@ -369,23 +401,50 @@ def validate_models() -> Tuple[int, int]:
     return found, total
 
 def validate_agents() -> Tuple[int, int]:
-    """Validate created agents"""
+    """Validate created agents by scanning Modelfiles directory"""
     print_info("Checking created agents...")
     print()
     
+    script_dir = Path(__file__).parent.resolve()
+    modelfiles_dir = script_dir / "modelfiles"
     ollama_list = get_ollama_list()
     
     found = 0
-    total = len(PERSONAS)
+    total = 0
     
-    for persona_id, cfg in sorted(PERSONAS.items()):
-        agent_name = cfg["agent"]
+    if not modelfiles_dir.exists():
+        print_error(f"Modelfiles directory not found: {modelfiles_dir}")
+        return 0, 0
+    
+    # Scan all Modelfiles and check if corresponding agents exist
+    for modelfile_path in sorted(modelfiles_dir.glob("*.Modelfile")):
+        agent_name = get_agent_name_from_modelfile(modelfile_path)
+        if not agent_name:
+            continue
+        
+        total += 1
+        
+        # Find persona description if available
+        persona_id = None
+        description = "No description"
+        for pid, cfg in PERSONAS.items():
+            if cfg["modelfile"] == modelfile_path.name:
+                persona_id = pid
+                description = cfg["description"]
+                break
+        
         if agent_name in ollama_list:
-            print_success(f"{agent_name} - {cfg['description']}")
+            print_success(f"{agent_name} - {description}")
+            if persona_id:
+                print_info(f"   Persona: {persona_id}")
             found += 1
         else:
             print_error(f"{agent_name} (missing)")
-            print_info(f"   Run: python3 setup_ollama.py --persona {persona_id} --create")
+            print_info(f"   {description}")
+            if persona_id:
+                print_info(f"   Create with: python3 setup_ollama.py --persona {persona_id} --create")
+            else:
+                print_info(f"   Create with: ollama create {agent_name} -f {modelfile_path}")
     
     return found, total
 
@@ -520,19 +579,58 @@ def validate_setup(quick: bool = False):
     return all_good
 
 def list_personas():
-    """List available personas"""
+    """List available personas and their corresponding Modelfiles"""
     print_header("AVAILABLE PERSONAS")
     
+    script_dir = Path(__file__).parent.resolve()
+    modelfiles_dir = script_dir / "modelfiles"
     ollama_list = get_ollama_list()
     
-    for persona_id, cfg in sorted(PERSONAS.items()):
-        agent_name = cfg["agent"]
-        status = "✅ installed" if agent_name in ollama_list else "❌ not installed"
-        
-        print(f"{persona_id:12} → {agent_name:20} {status}")
-        print(f"{'':12}    {cfg['description']}")
-        print(f"{'':12}    Model: {cfg['base_model']}")
+    if not modelfiles_dir.exists():
+        print_error(f"Modelfiles directory not found: {modelfiles_dir}")
+        return
+    
+    # Group by category
+    categories = {
+        "Architecture": ["arch", "arch-deepseek", "arch-qwen3_14b", "arch-qwen3_30b", "arch-qwen3_coder"],
+        "Development": ["dev", "dev-qw3"],
+        "Quality": ["test", "review", "debug", "refactor"],
+        "Planning": ["plan", "planlite"],
+        "Other": ["orch", "docs"]
+    }
+    
+    for category, persona_ids in categories.items():
+        print_colored(f"\n{category}:", Colors.CYAN, bold=True)
         print()
+        
+        for persona_id in persona_ids:
+            if persona_id not in PERSONAS:
+                continue
+            
+            cfg = PERSONAS[persona_id]
+            modelfile_path = modelfiles_dir / cfg["modelfile"]
+            
+            if not modelfile_path.exists():
+                print_warning(f"{persona_id:20} - Modelfile missing: {cfg['modelfile']}")
+                continue
+            
+            agent_name = get_agent_name_from_modelfile(modelfile_path)
+            base_model = get_base_model_from_modelfile(modelfile_path)
+            
+            status = "✅ installed" if agent_name and agent_name in ollama_list else "❌ not installed"
+            
+            print(f"  {persona_id:20} → {agent_name or 'unknown':30} {status}")
+            print(f"  {'':20}    {cfg['description']}")
+            print(f"  {'':20}    Base: {base_model or 'unknown'}")
+            print()
+    
+    print()
+    print_info("To create an agent:")
+    print("  python3 setup_ollama.py --persona <persona-id> --pull --create")
+    print()
+    print_info("To create all agents:")
+    print("  python3 setup_ollama.py --persona arch,dev,test,plan,... --pull --create")
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -659,7 +757,8 @@ Examples:
         
         if invalid:
             print_error(f"Invalid personas: {', '.join(invalid)}")
-            print_info(f"Available: {', '.join(PERSONAS.keys())}")
+            print_info(f"Available: {', '.join(sorted(PERSONAS.keys()))}")
+            print_info("Use --list to see all available personas with details")
             return 2
         
         print_header("PERSONA SETUP")
@@ -667,17 +766,17 @@ Examples:
         for persona in requested:
             print()
             print_info(f"Processing: {persona}")
-            cfg = PERSONAS[persona]
-            print_info(f"Agent: {cfg['agent']}")
-            print_info(f"Model: {cfg['base_model']}")
             print()
             
             success = create_persona(persona, args.pull, args.create)
             if success:
-                print_success(f"{persona} setup completed")
+                print_success(f"✅ {persona} setup completed")
             else:
-                print_error(f"{persona} setup failed")
+                print_error(f"❌ {persona} setup failed")
                 return 1
+            print()
+        
+        print_success("All persona setups completed!")
     
     # Show help if no action
     if not (args.global_env or args.persona or args.validate or args.test_agent):

@@ -1,4 +1,4 @@
-FROM qwen2.5:3b-instruct-q5_K_M
+FROM qwen2.5:3b-instruct
 
 SYSTEM """You are an intelligent routing agent for software development workflows.
 

@@ -1,4 +1,4 @@
-FROM qwen2.5:14b-instruct-q5_K_M
+FROM qwen2.5:14b-instruct
 
 SYSTEM """You are a technical planning specialist who transforms requirements into detailed, executable development specifications.
 
