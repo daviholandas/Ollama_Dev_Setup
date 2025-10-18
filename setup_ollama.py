@@ -31,6 +31,7 @@ import sys
 import subprocess
 import platform
 import time
+import re
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
@@ -45,78 +46,91 @@ class Colors:
     RESET = '\033[0m'
 
 # Persona metadata - used only for listing and validation
-# Agent creation is strictly done from Modelfiles in modelfiles/ directory
 PERSONAS = {
     # Architecture agents
     "arch": {
         "modelfile": "arch-agent.Modelfile",
+        "agent_name": "arch",
         "description": "Principal architect - DDD, microservices, cloud-native (qwen2.5:32b-instruct)"
     },
-    "arch-deepseek": {
+    "arch-ds": {
         "modelfile": "arch-agent-deepseek.Modelfile",
+        "agent_name": "arch-ds",
         "description": "Architecture with chain-of-thought reasoning (deepseek-r1:32b)"
     },
-    "arch-qwen3_14b": {
+    "arch14": {
         "modelfile": "arch-agent-qwen3_14b.Modelfile",
+        "agent_name": "arch14",
         "description": "Architecture variant with Qwen3 14B (qqwen3:14b)"
     },
-    "arch-qwen3_30b": {
+    "arch30": {
         "modelfile": "arch-agent-qwen3_30b.Modelfile",
+        "agent_name": "arch30",
         "description": "Architecture variant with Qwen3 30B (qwen3:30b)"
     },
-    "arch-qwen3_coder": {
+    "arch-coder": {
         "modelfile": "arch-agent-qwen3_coder.Modelfile",
+        "agent_name": "arch-coder",
         "description": "Architecture with code focus (qwen3-coder:30b)"
     },
     
     # Development agents
     "dev": {
         "modelfile": "dev-agent.Modelfile",
+        "agent_name": "dev",
         "description": "Code generation specialist - .NET, boilerplate (qwen2.5-coder:32b)"
     },
-    "dev-qw3": {
+    "devq3": {
         "modelfile": "dev-agent-qw3.Modelfile",
+        "agent_name": "devq3",
         "description": "Code generation with Qwen3 Coder 30B (qwen3-coder:30b)"
     },
     
     # Specialized agents
-    "test": {
+    "tester": {
         "modelfile": "test-agent.Modelfile",
+        "agent_name": "tester",
         "description": "Test generation - unit, integration, e2e (qwen2.5-coder:14b-instruct)"
     },
-    "plan": {
+    "planner": {
         "modelfile": "plan-agent.Modelfile",
+        "agent_name": "planner",
         "description": "Detailed project planning and specifications (qwen2.5:14b-instruct)"
     },
-    "planlite": {
+    "plannerlite": {
         "modelfile": "planlite-agent.Modelfile",
+        "agent_name": "plannerlite",
         "description": "Quick sprint planning and agile specs (qwen2.5:7b-instruct)"
     },
     "orch": {
         "modelfile": "orch-agent.Modelfile",
+        "agent_name": "orch",
         "description": "Intelligent routing and task orchestration (qwen2.5:3b-instruct)"
     },
-    "review": {
+    "reviewer": {
         "modelfile": "review-agent.Modelfile",
+        "agent_name": "reviewer",
         "description": "Code review - security, performance, best practices (qwen2.5-coder:14b-instruct)"
     },
-    "debug": {
+    "debugger": {
         "modelfile": "debug-agent.Modelfile",
+        "agent_name": "debugger",
         "description": "Root cause analysis and debugging (qwen2.5-coder:32b-instruct)"
     },
     "refactor": {
         "modelfile": "refactor-agent.Modelfile",
+        "agent_name": "refactor",
         "description": "Code quality improvement and refactoring (qwen2.5-coder:14b-instruct)"
     },
     "docs": {
         "modelfile": "docs-agent.Modelfile",
+        "agent_name": "docs",
         "description": "Technical documentation and API docs (qwen2.5:7b-instruct)"
     }
 }
 
 DEFAULT_ENVS = {
     "OLLAMA_NUM_GPU": "1",
-    "OLLAMA_GPU_LAYERS": "999",
     "OLLAMA_NUM_THREADS": "8",
     "OLLAMA_MAX_LOADED_MODELS": "1",
     "OLLAMA_KEEP_ALIVE": "5m",
@@ -176,7 +190,7 @@ def have_ollama() -> bool:
     except Exception:
         return False
 
-def run_command(cmd: List[str], verbose: bool = True) -> Tuple[bool, str]:
+def run_command(cmd: List[str], verbose: bool = True, timeout: int = 120) -> Tuple[bool, str]:
     """Execute command and return success status and output"""
     if verbose:
         print(f"$ {' '.join(cmd)}")
@@ -187,13 +201,86 @@ def run_command(cmd: List[str], verbose: bool = True) -> Tuple[bool, str]:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=120
+            timeout=timeout
         )
         return True, result.stdout
     except subprocess.CalledProcessError as e:
         return False, e.stderr
     except subprocess.TimeoutExpired:
-        return False, "Command timeout (>120s)"
+        return False, f"Command timeout (>{timeout}s)"
+    except Exception as e:
+        return False, str(e)
+
+def run_ollama_pull_with_progress(model: str, timeout: int = 1800) -> Tuple[bool, str]:
+    """Execute ollama pull with live progress display"""
+    print(f"$ ollama pull {model}")
+    print()
+    
+    try:
+        process = subprocess.Popen(
+            ["ollama", "pull", model],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True
+        )
+        
+        output_lines = []
+        start_time = time.time()
+        last_line = ""
+        
+        # Track progress
+        while True:
+            # Check timeout
+            if time.time() - start_time > timeout:
+                process.kill()
+                return False, f"Command timeout (>{timeout}s)"
+            
+            line = process.stdout.readline()
+            if not line:
+                break
+            
+            line = line.rstrip()
+            if not line:
+                continue
+            
+            output_lines.append(line)
+            
+            # Parse and display progress
+            # Ollama outputs lines like: "pulling manifest", "pulling <hash>", "verifying sha256 digest"
+            if "pulling" in line.lower() or "downloading" in line.lower():
+                # Clear previous line and print new progress
+                print(f"\r{Colors.BLUE}⬇️  {line}{Colors.RESET}", end="", flush=True)
+                last_line = line
+            elif "verifying" in line.lower():
+                print(f"\r{Colors.CYAN}✓ {line}{Colors.RESET}")
+                last_line = line
+            elif "success" in line.lower():
+                print(f"\r{Colors.GREEN}✓ {line}{Colors.RESET}")
+                last_line = line
+            elif line.strip():
+                # Print other messages
+                if last_line:
+                    print()  # New line after progress
+                print(f"{Colors.BLUE}  {line}{Colors.RESET}")
+                last_line = ""
+        
+        # Wait for process to complete
+        return_code = process.wait(timeout=10)
+        
+        if last_line:
+            print()  # Final newline after progress
+        
+        full_output = "\n".join(output_lines)
+        
+        if return_code == 0:
+            return True, full_output
+        else:
+            return False, full_output
+            
+    except subprocess.TimeoutExpired:
+        return False, f"Command timeout (>{timeout}s)"
     except Exception as e:
         return False, str(e)
 
@@ -216,6 +303,35 @@ def check_vram() -> Optional[Dict[str, int]]:
         return {"used": used, "total": total, "percent": (used * 100) // total}
     except Exception:
         return None
+
+def get_vram_recommendation(vram_mb: int) -> dict:
+    """Get recommended configuration based on available VRAM"""
+    recommendations = {
+        8192: {  # 8GB
+            "max_model": "14b",
+            "gpu_layers": {"32b": 25, "30b": 20, "14b": 999, "7b": 999, "3b": 999}
+        },
+        12288: {  # 12GB
+            "max_model": "32b (hybrid)",
+            "gpu_layers": {"32b": 35, "30b": 30, "14b": 999, "7b": 999, "3b": 999}
+        },
+        16384: {  # 16GB
+            "max_model": "32b",
+            "gpu_layers": {"32b": 45, "30b": 40, "14b": 999, "7b": 999, "3b": 999}
+        },
+        24576: {  # 24GB
+            "max_model": "72b (hybrid)",
+            "gpu_layers": {"72b": 40, "32b": 999, "30b": 999, "14b": 999, "7b": 999, "3b": 999}
+        }
+    }
+    
+    # Find closest VRAM config
+    for threshold in sorted(recommendations.keys()):
+        if vram_mb <= threshold:
+            return recommendations[threshold]
+    
+    # For >24GB
+    return recommendations[24576]
 
 def write_system_override(envs: Dict[str, str]):
     """Write systemd override for root installation"""
@@ -314,6 +430,23 @@ def get_base_model_from_modelfile(modelfile_path: Path) -> Optional[str]:
         print_error(f"Failed to read Modelfile: {e}")
     return None
 
+def detect_model_size(model_name: str) -> Optional[str]:
+    """Detect model size from model name (e.g., qwen3:30b -> '30b')"""
+    # Common patterns: qwen2.5:32b, deepseek-r1:32b, qwen3:30b, etc.
+    import re
+    patterns = [
+        r':(\d+)b',      # :30b, :32b, :14b
+        r'-(\d+)b',      # -30b, -32b
+        r'(\d+)b',       # 30b, 32b (standalone)
+    ]
+    
+    for pattern in patterns:
+        match = re.search(pattern, model_name.lower())
+        if match:
+            return f"{match.group(1)}b"
+    
+    return None
+
 def create_persona(persona: str, do_pull: bool, do_create: bool):
     """Download model and create agent strictly from Modelfile"""
     if persona not in PERSONAS:
@@ -328,11 +461,13 @@ def create_persona(persona: str, do_pull: bool, do_create: bool):
         print_error(f"Modelfile not found: {modelfile_path}")
         return False
     
-    # Extract agent name from Modelfile filename
-    agent_name = get_agent_name_from_modelfile(modelfile_path)
+    # Use custom agent name if specified, otherwise extract from Modelfile filename
+    agent_name = cfg.get("agent_name")
     if not agent_name:
-        print_error(f"Could not determine agent name from: {modelfile_path.name}")
-        return False
+        agent_name = get_agent_name_from_modelfile(modelfile_path)
+        if not agent_name:
+            print_error(f"Could not determine agent name from: {modelfile_path.name}")
+            return False
     
     # Extract base model from Modelfile
     base_model = get_base_model_from_modelfile(modelfile_path)
@@ -347,26 +482,72 @@ def create_persona(persona: str, do_pull: bool, do_create: bool):
     
     if do_pull:
         print_info(f"Pulling base model: {base_model}")
-        success, error_msg = run_command(["ollama", "pull", base_model])
+        print_warning(f"This may take several minutes for large models (30B+ models can be ~20GB)")
+        print()
+        
+        # Use pull with progress display (30 minute timeout)
+        success, error_msg = run_ollama_pull_with_progress(base_model, timeout=1800)
+        
         if not success:
+            print()
             print_error(f"Failed to pull {base_model}")
             print_error(f"Error: {error_msg}")
             return False
+        
+        print()
         print_success(f"Model {base_model} pulled successfully!")
     
     if do_create:
         print_info(f"Creating agent: {agent_name}")
         
+        # Detect model size for informational purposes
+        model_size = detect_model_size(base_model)
+        if model_size:
+            print_info(f"Model size: {model_size}")
+        
+        # Check if Modelfile already has num_gpu parameter
+        modelfile_content = modelfile_path.read_text()
+        has_num_gpu = "PARAMETER num_gpu" in modelfile_content
+        
+        if has_num_gpu:
+            print_info("Using custom num_gpu from Modelfile")
+        else:
+            print_success("Using Ollama's automatic GPU/CPU management")
+            print_info("Ollama will optimize memory allocation for your hardware")
+        
+        print_info("Loading model and applying configuration...")
+        
+        # Show a simple spinner during agent creation
+        print(f"{Colors.CYAN}⚙️  Processing", end="", flush=True)
+        
         success, error_msg = run_command(
-            ["ollama", "create", agent_name, "-f", str(modelfile_path)]
+            ["ollama", "create", agent_name, "-f", str(modelfile_path)],
+            verbose=False,
+            timeout=300  # 5 minutes for large models
         )
+        
+        # Clear spinner line
+        print(f"\r{' ' * 50}\r", end="", flush=True)
         
         if not success:
             print_error(f"Failed to create {agent_name}")
             print_error(f"Ollama error: {error_msg}")
+            
+            # Check for memory error
+            if "memory layout cannot be allocated" in error_msg or "out of memory" in error_msg:
+                print()
+                print_warning("Memory allocation error detected!")
+                print_info("This model may be too large for available VRAM. Suggestions:")
+                print(f"  1. Try smaller quantization: q4_K_M instead of q5_K_M or q6_K")
+                print(f"  2. Use smaller model variant (14B instead of 30B/32B)")
+                print(f"  3. Close other applications to free VRAM")
+                print(f"  4. Check current usage: nvidia-smi")
+                print(f"  5. Stop running models: ollama stop --all")
+            
             return False
         
-        print_success(f"Agent {agent_name} created successfully!")
+        print_success(f"Agent '{agent_name}' created successfully!")
+        print_info(f"Usage: ollama run {agent_name}")
     
     return True
 
@@ -418,20 +599,26 @@ def validate_agents() -> Tuple[int, int]:
     
     # Scan all Modelfiles and check if corresponding agents exist
     for modelfile_path in sorted(modelfiles_dir.glob("*.Modelfile")):
-        agent_name = get_agent_name_from_modelfile(modelfile_path)
+        # Find persona configuration
+        persona_id = None
+        agent_name = None
+        description = "No description"
+        
+        for pid, cfg in PERSONAS.items():
+            if cfg["modelfile"] == modelfile_path.name:
+                persona_id = pid
+                agent_name = cfg.get("agent_name") or get_agent_name_from_modelfile(modelfile_path)
+                description = cfg["description"]
+                break
+        
+        # If not in PERSONAS, use filename
+        if not agent_name:
+            agent_name = get_agent_name_from_modelfile(modelfile_path)
+        
         if not agent_name:
             continue
         
         total += 1
-        
-        # Find persona description if available
-        persona_id = None
-        description = "No description"
-        for pid, cfg in PERSONAS.items():
-            if cfg["modelfile"] == modelfile_path.name:
-                persona_id = pid
-                description = cfg["description"]
-                break
         
         if agent_name in ollama_list:
             print_success(f"{agent_name} - {description}")
@@ -614,7 +801,7 @@ def list_personas():
                 print_warning(f"{persona_id:20} - Modelfile missing: {cfg['modelfile']}")
                 continue
             
-            agent_name = get_agent_name_from_modelfile(modelfile_path)
+            agent_name = cfg.get("agent_name") or get_agent_name_from_modelfile(modelfile_path)
             base_model = get_base_model_from_modelfile(modelfile_path)
             
             status = "✅ installed" if agent_name and agent_name in ollama_list else "❌ not installed"
@@ -698,14 +885,34 @@ Examples:
         return 0
     
     if args.check_vram:
-        print_header("VRAM STATUS")
+        print_header("VRAM STATUS & RECOMMENDATIONS")
         vram = check_vram()
         if vram:
             print_success(f"Used: {vram['used']}MB")
             print_success(f"Total: {vram['total']}MB")
+            print_success(f"Available: {vram['total'] - vram['used']}MB")
             print_success(f"Usage: {vram['percent']}%")
+            
             if vram['percent'] > 80:
                 print_warning("High VRAM usage - consider freeing memory")
+            
+            print()
+            print_colored("Recommended GPU Layers for Your Setup:", Colors.CYAN, bold=True)
+            print()
+            
+            vram_rec = get_vram_recommendation(vram['total'])
+            print_info(f"Your GPU can handle models up to: {vram_rec['max_model']}")
+            print()
+            
+            print("Model Size | GPU Layers | Mode")
+            print("-" * 45)
+            for size, layers in sorted(vram_rec['gpu_layers'].items(), key=lambda x: int(x[0].replace('b', ''))):
+                mode = "Full GPU" if layers == 999 else "Hybrid GPU+CPU"
+                print(f"  {size:8} | {layers:10} | {mode}")
+            
+            print()
+            print_info("To apply these settings, add to your Modelfile:")
+            print(f"  PARAMETER num_gpu <value>")
         else:
             print_error("nvidia-smi not available")
         return 0
