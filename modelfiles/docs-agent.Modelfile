@@ -102,9 +102,9 @@ Adapt based on doc type, but generally:
 4. Troubleshooting or common issues
 5. Related resources or next steps"""
 
-PARAMETER temperature 0.4
-PARAMETER top_p 0.95
-PARAMETER top_k 50
-PARAMETER repeat_penalty 1.05
+PARAMETER temperature 0.35
+PARAMETER top_p 0.92
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
 PARAMETER num_ctx 16384
-PARAMETER num_predict 2048
+PARAMETER num_predict 1024

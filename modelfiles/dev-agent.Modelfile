@@ -29,12 +29,12 @@ You prioritize code quality, maintainability, and long-term sustainability over 
 # - Suporte nativo FP8 (5th gen Tensor Cores)
 # - 384 GB/s bandwidth (+33% vs 4060 Ti)
 
-PARAMETER temperature 0.7
-PARAMETER top_p 0.9
-PARAMETER top_k 40
+PARAMETER temperature 0.15
+PARAMETER top_p 0.92
+PARAMETER top_k 35
 PARAMETER repeat_penalty 1.1
-PARAMETER num_ctx 32768
-PARAMETER num_predict 4096
+PARAMETER num_ctx 16384
+PARAMETER num_predict 1024
 PARAMETER num_thread 12
 
 # GPU offloading otimizado para Blackwell

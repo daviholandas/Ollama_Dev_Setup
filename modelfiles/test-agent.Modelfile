@@ -47,7 +47,7 @@ OUTPUT FORMAT:
 PARAMETER temperature 0.15
 PARAMETER top_p 0.9
 PARAMETER top_k 32
-PARAMETER repeat_penalty 1.08
+PARAMETER repeat_penalty 1.1
 PARAMETER num_ctx 16384
-PARAMETER num_predict 1536
+PARAMETER num_predict 896
 PARAMETER stop "```"

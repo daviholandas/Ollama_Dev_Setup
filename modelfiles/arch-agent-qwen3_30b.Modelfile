@@ -39,8 +39,8 @@ OUTPUT FORMAT:
 7. Success Metrics: Define measurable outcomes (SLIs/SLOs)"""
 
 PARAMETER temperature 0.6
-PARAMETER top_p 0.95
-PARAMETER top_k 50
-PARAMETER repeat_penalty 1.05
+PARAMETER top_p 0.9
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
 PARAMETER num_ctx 24576
-PARAMETER num_predict 2048
+PARAMETER num_predict 1024

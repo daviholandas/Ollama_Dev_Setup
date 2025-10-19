@@ -31,10 +31,10 @@ KEEP IT:
 - Actionable: Developer can start immediately
 - Focused: One sprint, one goal"""
 
-PARAMETER temperature 0.4
-PARAMETER top_p 0.95
-PARAMETER top_k 50
-PARAMETER repeat_penalty 1.07
+PARAMETER temperature 0.35
+PARAMETER top_p 0.92
+PARAMETER top_k 40
+PARAMETER repeat_penalty 1.1
 PARAMETER num_ctx 8192
-PARAMETER num_predict 1024
+PARAMETER num_predict 768
 
