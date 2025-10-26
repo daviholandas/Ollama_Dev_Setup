@@ -1,4 +1,4 @@
-# 🚀 VLLM-Powered Multi-Agent Development Platform
+# 🚀Powered Multi-Agent Locally Development Platform
 
 <p align="center">
   <b>High-Performance Local Inference with Specialized AI Agents</b><br>
@@ -16,7 +16,7 @@
 
 ## 🎯 Overview
 
-This project represents a **complete migration from Ollama to VLLM** — enabling **significantly higher throughput, lower latency, and more efficient GPU memory utilization** through advanced features like PagedAttention, continuous batching, and optimized tensor parallelism.
+This project represents a **complete local setup to use VLLM** — enabling **significantly higher throughput, lower latency, and more efficient GPU memory utilization** through advanced features like PagedAttention, continuous batching, and optimized tensor parallelism.
 
 The platform deploys **three specialized AI agents** in isolated Docker containers:
 

@@ -1,0 +1,216 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "validate_architecture",
+      "description": "Validate system architecture against best practices and requirements",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "architecture_description": {
+            "type": "string",
+            "description": "Detailed description of the system architecture"
+          },
+          "validation_scope": {
+            "type": "string",
+            "enum": [
+              "microservices",
+              "monolithic",
+              "serverless",
+              "hybrid",
+              "distributed"
+            ],
+            "description": "Type of architecture to validate"
+          },
+          "check_scalability": {
+            "type": "boolean",
+            "description": "Check scalability characteristics"
+          },
+          "check_resilience": {
+            "type": "boolean",
+            "description": "Check resilience and fault tolerance"
+          }
+        },
+        "required": [
+          "architecture_description",
+          "validation_scope"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "generate_architecture_diagram",
+      "description": "Generate a system architecture diagram in various formats",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "diagram_type": {
+            "type": "string",
+            "enum": [
+              "mermaid",
+              "plantuml",
+              "graphviz",
+              "ascii"
+            ],
+            "description": "Format for the diagram"
+          },
+          "components": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "service",
+                    "database",
+                    "cache",
+                    "queue",
+                    "gateway",
+                    "external"
+                  ]
+                }
+              }
+            },
+            "description": "System components"
+          },
+          "include_data_flow": {
+            "type": "boolean",
+            "description": "Include data flow between components"
+          }
+        },
+        "required": [
+          "diagram_type",
+          "components"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "analyze_performance_implications",
+      "description": "Analyze performance implications of proposed architecture",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "architecture_design": {
+            "type": "string",
+            "description": "Description of the architecture design"
+          },
+          "expected_scale": {
+            "type": "object",
+            "properties": {
+              "requests_per_second": {
+                "type": "integer",
+                "description": "Expected RPS"
+              },
+              "concurrent_users": {
+                "type": "integer",
+                "description": "Expected concurrent users"
+              },
+              "data_volume_gb": {
+                "type": "integer",
+                "description": "Expected data volume in GB"
+              }
+            }
+          },
+          "focus_areas": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "latency",
+                "throughput",
+                "memory",
+                "cpu",
+                "network",
+                "storage"
+              ]
+            }
+          }
+        },
+        "required": [
+          "architecture_design",
+          "focus_areas"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "suggest_technology_stack",
+      "description": "Suggest appropriate technology stack for the architecture",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "requirements": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "enum": [
+                  "java",
+                  "python",
+                  "csharp",
+                  "go",
+                  "rust",
+                  "typescript",
+                  "agnostic"
+                ]
+              },
+              "deployment_model": {
+                "type": "string",
+                "enum": [
+                  "on_premise",
+                  "cloud",
+                  "hybrid",
+                  "edge"
+                ]
+              },
+              "team_expertise": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Team's existing expertise areas"
+              }
+            }
+          },
+          "constraints": {
+            "type": "object",
+            "properties": {
+              "budget": {
+                "type": "string",
+                "enum": [
+                  "low",
+                  "medium",
+                  "high",
+                  "unlimited"
+                ]
+              },
+              "time_to_market": {
+                "type": "string",
+                "enum": [
+                  "critical",
+                  "urgent",
+                  "normal",
+                  "flexible"
+                ]
+              }
+            }
+          }
+        },
+        "required": [
+          "requirements"
+        ]
+      }
+    }
+  }
+]

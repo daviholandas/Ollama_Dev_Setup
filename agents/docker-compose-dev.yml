@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  dev-agent:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-dev-agent
+    runtime: nvidia
+    environment:
+      # GPU Configuration
+      - NVIDIA_VISIBLE_DEVICES=0
+      - CUDA_VISIBLE_DEVICES=0
+      - VLLM_GPU_MEMORY_UTILIZATION=0.90
+      
+      # VLLM Core Features
+      - VLLM_ENABLE_PREFIX_CACHING=1
+      - VLLM_ENABLE_CHUNKED_PREFILL=1
+      
+      # Tool-Calling Features (NEW)
+      - VLLM_ENABLE_AUTO_TOOL_CHOICE=1
+      - VLLM_TOOL_CALL_PARSER=json
+      - VLLM_MAX_PARALLEL_TOOL_CALLS=3
+      - VLLM_TOOL_TIMEOUT=60
+      - VLLM_ENABLE_SCHEMA_CACHE=1
+      - VLLM_CACHE_TOOL_DEFINITIONS=1
+      
+      # Code Execution Features
+      - VLLM_ENABLE_CODE_EXECUTION=1
+      - VLLM_SANDBOX_CODE_EXECUTION=1
+      
+      # Logging and Debugging
+      - VLLM_LOG_LEVEL=INFO
+    
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./tools:/app/tools
+      - ./outputs:/outputs
+      - ./logs/dev:/var/log/vllm
+      - ./workspace:/workspace  # For code execution sandbox
+    
+    ports:
+      - "8001:8000"  # OpenAI-compatible API (mapped to 8001)
+      - "8101:8100"  # Metrics/monitoring port (optional)
+    
+    command: >
+      --model Qwen/Qwen2.5-Coder-14B-Instruct-GPTQ
+      --served-model-name dev
+      --gpu-memory-utilization 0.90
+      --max-model-len 16384
+      --tensor-parallel-size 1
+      --enable-prefix-caching
+      --enable-auto-tool-choice
+      --tool-call-parser json
+      --port 8000
+    
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    restart: unless-stopped
+    
+    labels:
+      agent_name: "Developer Agent"
+      agent_role: "Code Generation & Implementation"
+      agent_port: "8001"
+      tool_support: "true"
+      code_execution: "enabled"
+
+networks:
+  default:
+    name: vllm-network
+    driver: bridge

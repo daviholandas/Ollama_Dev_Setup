@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  architect-agent:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-architect-agent
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0
+      - CUDA_VISIBLE_DEVICES=0
+      - VLLM_GPU_MEMORY_UTILIZATION=0.85
+      - VLLM_ENABLE_PREFIX_CACHING=1
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ./outputs:/outputs
+    ports:
+      - "8000:8000"  # OpenAI-compatible API
+    command: >
+      --model Qwen/Qwen2.5-14B-Instruct-AWQ
+      --served-model-name architect
+      --gpu-memory-utilization 0.85
+      --max-model-len 16384
+      --tensor-parallel-size 1
+      --enable-prefix-caching
+      --port 8000
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: vllm-network
+    driver: bridge

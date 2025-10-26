@@ -1,0 +1,298 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "execute_code",
+      "description": "Execute code in a safe sandbox environment",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": [
+              "python",
+              "javascript",
+              "bash",
+              "csharp",
+              "java",
+              "go",
+              "rust",
+              "sql"
+            ],
+            "description": "Programming language"
+          },
+          "code": {
+            "type": "string",
+            "description": "Code to execute"
+          },
+          "timeout": {
+            "type": "integer",
+            "description": "Execution timeout in seconds",
+            "default": 30,
+            "maximum": 120
+          },
+          "environment": {
+            "type": "object",
+            "description": "Environment variables to set",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "language",
+          "code"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "run_tests",
+      "description": "Execute test suite for code validation",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "test_framework": {
+            "type": "string",
+            "enum": [
+              "pytest",
+              "unittest",
+              "jest",
+              "mocha",
+              "xunit",
+              "nunit",
+              "gotest",
+              "cargo"
+            ],
+            "description": "Testing framework"
+          },
+          "test_path": {
+            "type": "string",
+            "description": "Path to test file or directory"
+          },
+          "test_filter": {
+            "type": "string",
+            "description": "Filter tests by name/pattern (optional)"
+          },
+          "coverage": {
+            "type": "boolean",
+            "description": "Generate coverage report",
+            "default": false
+          }
+        },
+        "required": [
+          "test_framework",
+          "test_path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lint_code",
+      "description": "Run code linter for quality checks",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "linter": {
+            "type": "string",
+            "enum": [
+              "pylint",
+              "flake8",
+              "black",
+              "eslint",
+              "prettier",
+              "roslyn",
+              "golangci-lint",
+              "clippy"
+            ],
+            "description": "Linting tool"
+          },
+          "file_path": {
+            "type": "string",
+            "description": "File or directory to lint"
+          },
+          "fix_issues": {
+            "type": "boolean",
+            "description": "Automatically fix issues if possible",
+            "default": false
+          },
+          "severity_threshold": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ],
+            "description": "Minimum severity level to report"
+          }
+        },
+        "required": [
+          "linter",
+          "file_path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "git_operation",
+      "description": "Perform git operations (commit, branch, etc.)",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "operation": {
+            "type": "string",
+            "enum": [
+              "commit",
+              "branch",
+              "checkout",
+              "merge",
+              "rebase",
+              "status",
+              "diff",
+              "log"
+            ],
+            "description": "Git operation to perform"
+          },
+          "message": {
+            "type": "string",
+            "description": "Commit message (for commit operation)"
+          },
+          "branch_name": {
+            "type": "string",
+            "description": "Branch name (for branch/checkout operations)"
+          },
+          "args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional git arguments"
+          }
+        },
+        "required": [
+          "operation"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "analyze_code",
+      "description": "Analyze code for quality, security, and maintainability issues",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "file_path": {
+            "type": "string",
+            "description": "Path to file or directory to analyze"
+          },
+          "analysis_type": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "security",
+                "performance",
+                "maintainability",
+                "complexity",
+                "documentation",
+                "all"
+              ]
+            },
+            "description": "Types of analysis to perform"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language (auto-detect if not specified)"
+          }
+        },
+        "required": [
+          "file_path"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "build_project",
+      "description": "Build project using appropriate build tool",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "build_system": {
+            "type": "string",
+            "enum": [
+              "maven",
+              "gradle",
+              "msbuild",
+              "dotnet",
+              "make",
+              "cmake",
+              "cargo",
+              "go",
+              "npm",
+              "yarn",
+              "poetry"
+            ],
+            "description": "Build system to use"
+          },
+          "target": {
+            "type": "string",
+            "description": "Build target (e.g., Debug, Release)",
+            "default": "Release"
+          },
+          "additional_args": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Additional build arguments"
+          }
+        },
+        "required": [
+          "build_system"
+        ]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "debug_code",
+      "description": "Debug code and generate debugging information",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "stack_trace": {
+            "type": "string",
+            "description": "Stack trace or error message"
+          },
+          "language": {
+            "type": "string",
+            "description": "Programming language"
+          },
+          "context": {
+            "type": "string",
+            "description": "Additional context about the error"
+          },
+          "provide_fixes": {
+            "type": "boolean",
+            "description": "Provide potential code fixes",
+            "default": true
+          }
+        },
+        "required": [
+          "stack_trace"
+        ]
+      }
+    }
+  }
+]
