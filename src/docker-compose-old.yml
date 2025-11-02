@@ -1,0 +1,138 @@
+version: '3.8'
+services:
+  architect-agent:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-architect-agent
+    runtime: nvidia
+    environment:
+    - NVIDIA_VISIBLE_DEVICES=0
+    - CUDA_VISIBLE_DEVICES=0
+    - VLLM_GPU_MEMORY_UTILIZATION=0.85
+    - VLLM_ENABLE_PREFIX_CACHING=1
+    - VLLM_ENABLE_CHUNKED_PREFILL=1
+    - VLLM_ENABLE_AUTO_TOOL_CHOICE=1
+    - VLLM_TOOL_CALL_PARSER=hermes
+    - VLLM_LOG_LEVEL=INFO
+    - VLLM_API_KEY=${VLLM_API_KEY:-your-secret-api-key-here}
+    volumes:
+    - ~/.cache/huggingface:/root/.cache/huggingface
+    - ./tools:/app/tools:ro
+    - ./outputs:/outputs
+    - ./logs/architect:/var/log/vllm
+    - ./workspace:/workspace
+    ports:
+    - 8000:8000
+    command: --model Qwen/Qwen2.5-14B-Instruct-AWQ --served-model-name architect --gpu-memory-utilization
+      0.85 --max-model-len 16384 --enable-prefix-caching --enable-auto-tool-choice
+      --tool-call-parser hermes --api-key ${VLLM_API_KEY:-your-secret-api-key-here} --port 8000
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities:
+            - gpu
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8000/v1/models
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+  dev-agent:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-dev-agent
+    runtime: nvidia
+    environment:
+    - NVIDIA_VISIBLE_DEVICES=0
+    - CUDA_VISIBLE_DEVICES=0
+    - VLLM_GPU_MEMORY_UTILIZATION=0.9
+    - VLLM_ENABLE_PREFIX_CACHING=1
+    - VLLM_ENABLE_CHUNKED_PREFILL=1
+    - VLLM_ENABLE_AUTO_TOOL_CHOICE=1
+    - VLLM_TOOL_CALL_PARSER=hermes
+    - VLLM_LOG_LEVEL=INFO
+    - VLLM_API_KEY=${VLLM_API_KEY:-your-secret-api-key-here}
+    volumes:
+    - ~/.cache/huggingface:/root/.cache/huggingface
+    - ./tools:/app/tools:ro
+    - ./outputs:/outputs
+    - ./logs/dev:/var/log/vllm
+    - ./workspace:/workspace
+    ports:
+    - 8001:8000
+    command: --model Qwen/Qwen2.5-Coder-14B-Instruct-GPTQ --served-model-name dev
+      --gpu-memory-utilization 0.9 --max-model-len 16384 --enable-prefix-caching --enable-auto-tool-choice
+      --tool-call-parser hermes --api-key ${VLLM_API_KEY:-your-secret-api-key-here} --port 8000
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities:
+            - gpu
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8000/v1/models
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+  po-agent:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-po-agent
+    runtime: nvidia
+    environment:
+    - NVIDIA_VISIBLE_DEVICES=0
+    - CUDA_VISIBLE_DEVICES=0
+    - VLLM_GPU_MEMORY_UTILIZATION=0.7
+    - VLLM_ENABLE_PREFIX_CACHING=1
+    - VLLM_ENABLE_CHUNKED_PREFILL=1
+    - VLLM_ENABLE_AUTO_TOOL_CHOICE=1
+    - VLLM_TOOL_CALL_PARSER=hermes
+    - VLLM_LOG_LEVEL=INFO
+    - VLLM_API_KEY=${VLLM_API_KEY:-your-secret-api-key-here}
+    volumes:
+    - ~/.cache/huggingface:/root/.cache/huggingface
+    - ./tools:/app/tools:ro
+    - ./outputs:/outputs
+    - ./logs/po:/var/log/vllm
+    - ./workspace:/workspace
+    ports:
+    - 8002:8000
+    command: --model Qwen/Qwen2.5-7B-Instruct-AWQ --served-model-name po --gpu-memory-utilization
+      0.7 --max-model-len 8192 --enable-prefix-caching --enable-auto-tool-choice --tool-call-parser
+      hermes --api-key ${VLLM_API_KEY:-your-secret-api-key-here} --port 8000
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: 1
+            capabilities:
+            - gpu
+    healthcheck:
+      test:
+      - CMD
+      - curl
+      - -f
+      - http://localhost:8000/v1/models
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+networks:
+  default:
+    name: vllm-network
+    driver: bridge
